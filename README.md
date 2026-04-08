@@ -162,14 +162,6 @@ plot_fit(r)
   * downsample experimental data
   * limit optimizer iterations
 
----
-
-## Acknowledgment
-
-This work builds upon the **EPA Water Treatment Models**, extending them to support inverse modeling and parameter estimation for PFAS removal systems.
-
----
-
 ## License
 
 Specify your license here (e.g., MIT, GPL, etc.)
