@@ -164,5 +164,5 @@ plot_fit(r)
 
 ## License
 
-Specify your license here (e.g., MIT, GPL, etc.)
+MIT
 
