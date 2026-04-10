@@ -7,13 +7,13 @@ from scipy import interpolate
 import sys
 
 
-fn1 = "/Users/file path/Github_full/Water_Treatment_Models/PSDM" ### psdm
+fn1 = "/Users/mohammedfaran/Desktop/Research project & material/ix_github_files/Github_full/Water_Treatment_Models/PSDM" ### psdm
 if fn1 not in sys.path:
     sys.path.insert(0, fn1)
 
 import psdm.PSDM as PSDM
 
-fn = "/Users/mohammedfaran/Desktop/Research Data/experimental_2_PSDM.xlsx" # file path
+fn = '/Users/mohammedfaran/Desktop/Research project & material/IX/PSDM/experimental_2_PSDM.xlsx' # file path
 
 chem_data = PSDM.process_input_data(fn, sheet_name="Properties")
 k_data = pd.read_excel(fn, sheet_name="Kdata", index_col=0)          # extra sheets I added to the Excel file to help save time
