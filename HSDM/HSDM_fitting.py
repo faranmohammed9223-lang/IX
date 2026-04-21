@@ -3,26 +3,11 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from scipy.optimize import minimize
-
-# =========================================================
-# PATHS
-
-fn = "/Users/mohammedfaran/Desktop/Research project & material/ix_github_files/Github_full/Water_Treatment_Models/IonExchangeModel"
-fn1 = "/Users/mohammedfaran/Desktop/Research project & material/IX/HSDM/Actual_exp_Data_Provided_1.xlsx"
-
-if fn not in sys.path:
-    sys.path.append(fn)
-
 from ixpy.hsdmix import HSDMIX
 from ixpy.colloc import build_collocation  # optional
 
-print("Model path added to sys.path:")
-print(sys.path[-1])
-
-# =========================================================
-# LOAD DATA
-
-sheets = pd.read_excel(fn1, sheet_name=None)
+data_in = "Actual_exp_Data_Provided_1.xlsx"
+sheets = pd.read_excel(data_in, sheet_name=None)
 
 # Breakthrough data sheet
 brth_df = sheets["PFAS_BrTh"].copy()
@@ -35,6 +20,7 @@ print("PFAS found:", pfas_cols)
 
 # =========================================================
 # HELPER FUNCTIONS
+
 
 def rmse(yhat, y):
     yhat = np.asarray(yhat, dtype=float)
@@ -52,6 +38,7 @@ def normalize_breakthrough_ratio(y):
     y = np.where(np.isfinite(y), y, np.nan)
     return np.clip(y, 0.0, 2.0)
 
+
 def clean_exp_series(brth_df, pfas):
     t = brth_df["time"].to_numpy(dtype=float)
     bv = brth_df["BV-C/Co"].to_numpy(dtype=float)
@@ -61,11 +48,7 @@ def clean_exp_series(brth_df, pfas):
     if m.sum() < 8:
         return None
 
-    df = pd.DataFrame({
-        "t": t[m],
-        "bv": bv[m],
-        "y": y[m]
-    }).sort_values("t")
+    df = pd.DataFrame({"t": t[m], "bv": bv[m], "y": y[m]}).sort_values("t")
 
     # Average duplicate time points
     df = df.groupby("t", as_index=False).mean()
@@ -77,7 +60,7 @@ def clean_exp_series(brth_df, pfas):
     return {
         "t_s": t_u,
         "BVx": df["bv"].to_numpy(dtype=float) / 1000.0,
-        "y": normalize_breakthrough_ratio(df["y"].to_numpy(dtype=float))
+        "y": normalize_breakthrough_ratio(df["y"].to_numpy(dtype=float)),
     }
 
 
@@ -140,7 +123,7 @@ def fit_kxc_ds_robust(pfas):
     BVx_exp = exp["BVx"]
     y_exp = exp["y"]
 
-    base = HSDMIX(fn1)
+    base = HSDMIX(data_in)
 
     if pfas not in base.ions.index:
         print(f"[SKIP] {pfas}: not found in model ions")
@@ -160,7 +143,7 @@ def fit_kxc_ds_robust(pfas):
         kxc = 10 ** x[1]
 
         try:
-            m = HSDMIX(fn1)
+            m = HSDMIX(data_in)
             extend_influent_to_time(m, float(t_exp[-1]))
 
             m.ions.loc[pfas, "Ds"] = ds
@@ -172,15 +155,12 @@ def fit_kxc_ds_robust(pfas):
             return val if np.isfinite(val) else BIG
 
         except Exception as e:
-            print(f"[WARN] objective failed for {pfas} at Ds={ds:.2e}, Kxc={kxc:.3g}: {e}")
+            print(
+                f"[WARN] objective failed for {pfas} at Ds={ds:.2e}, Kxc={kxc:.3g}: {e}"
+            )
             return BIG
 
-    res = minimize(
-        objective,
-        x0,
-        method="L-BFGS-B",
-        bounds=bounds
-    )
+    res = minimize(objective, x0, method="L-BFGS-B", bounds=bounds)
 
     if not res.success:
         print(f"[FAIL] {pfas}: optimization failed -> {res.message}")
@@ -190,7 +170,7 @@ def fit_kxc_ds_robust(pfas):
     kxc_star = 10 ** res.x[1]
 
     # Final best-fit simulation
-    m = HSDMIX(fn1)
+    m = HSDMIX(data_in)
     extend_influent_to_time(m, float(t_exp[-1]))
 
     m.ions.loc[pfas, "Ds"] = ds_star
@@ -208,14 +188,16 @@ def fit_kxc_ds_robust(pfas):
         "BVx_exp": BVx_exp,
         "y_exp": y_exp,
         "BVx_model": BVx_model,
-        "y_model": y_model
+        "y_model": y_model,
     }
 
 
 def plot_fit(result):
     plt.figure(figsize=(10, 5))
     plt.plot(result["BVx_exp"], result["y_exp"], "o", alpha=0.5, label="Experimental")
-    plt.plot(result["BVx_model"], result["y_model"], "-", linewidth=2, label="Best-fit model")
+    plt.plot(
+        result["BVx_model"], result["y_model"], "-", linewidth=2, label="Best-fit model"
+    )
     plt.axhline(1.0, linewidth=1)
     plt.xlabel("Bed Volumes")
     plt.ylabel("C/C0")
@@ -257,22 +239,18 @@ for pfas in pfas_cols:
     plot_fit(result)
 
     full_results.append(result)
-    summary_results.append({
-        "PFAS": result["PFAS"],
-        "Kxc": result["Kxc"],
-        "Ds_cm2_s": result["Ds_cm2_s"],
-        "Ce": result["Ce"],
-        "qe": result["qe"],
-        "RMSE": result["RMSE"]
-    })
+    summary_results.append(
+        {
+            "PFAS": result["PFAS"],
+            "Kxc": result["Kxc"],
+            "Ds_cm2_s": result["Ds_cm2_s"],
+            "Ce": result["Ce"],
+            "qe": result["qe"],
+            "RMSE": result["RMSE"],
+        }
+    )
 
 # Final summary table
 df_results = pd.DataFrame(summary_results).sort_values("RMSE")
 print("\nFinal fitted results:")
 print(df_results)
-
-
-
-
-
-

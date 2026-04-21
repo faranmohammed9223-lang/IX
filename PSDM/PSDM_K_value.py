@@ -7,24 +7,23 @@ import matplotlib.pyplot as plt
 
 warnings.simplefilter("ignore")
 
-fn2 = "/Users/mohammedfaran/Desktop/Research project & material/ix_github_files/Github_full/Water_Treatment_Models/IonExchangeModel/PSDM"
-sys.path.append(fn2)
+# import inverse_PSDM as psdm_psdm
 
-import PSDM as psdm_psdm
-sys.modules["PSDM"] = psdm_psdm
-from psdm import PSDM_tools
-from psdm import PSDM
-from psdm.PSDM_functions import process_input_file, process_input_data
+# sys.modules["PSDM"] = psdm_psdm
+# from psdm import PSDM_tools
+# from psdm import PSDM
+# from psdm.PSDM_functions import process_input_file, process_input_data
+
+import PSDM.PSDM as PSDM
+import PSDM.PSDM_tools as PSDM_tools
 
 # -----------------------------
 # Load data
-fn = Path("/Users/mohammedfaran/Desktop/Research Data/Experimental_Data(PSDM)/experimental_1_PSDM.xlsx")
-rawdata_df, column_data, compounds, carbons = process_input_file(
-    fn,
-    data_sheet="data",
-    column_sheet="columnSpecs"
+fn = Path("experimental_1_PSDM.xlsx")
+rawdata_df, column_data, compounds, carbons = PSDM.process_input_file(
+    fn, data_sheet="data", column_sheet="columnSpecs"
 )
-comp_data = process_input_data(fn, sheet_name="Properties")
+comp_data = PSDM.process_input_data(fn, sheet_name="Properties")
 
 # -----------------------------
 # PSDM model
@@ -35,7 +34,7 @@ column = PSDM.PSDM(
     xn=1.0,
     optimize=False,
     chem_type="PFAS",
-    water_type="Organic Free"
+    water_type="Organic Free",
 )
 
 # -----------------------------
@@ -64,10 +63,12 @@ for compound in compounds:
             continue
 
         # Build dataframe
-        df = pd.DataFrame({
-            "time": eff_series.index.astype(float),
-            "Ct": eff_series.values.astype(float)
-        })
+        df = pd.DataFrame(
+            {
+                "time": eff_series.index.astype(float),
+                "Ct": eff_series.values.astype(float),
+            }
+        )
 
         cin = float(cin_series.mean())
 
@@ -76,19 +77,18 @@ for compound in compounds:
         df["Cin"] = cin
         df["Ce"] = df["Ct"]
 
-# -----------------------------
+        # -----------------------------
         # Compute q (FIXED)
         t = df["time"].to_numpy()
         Ct = df["Ct"].to_numpy()
 
         delta_c = cin - Ct
 
-        cum_int = np.zeros_like(delta_c)   # ✅ FIX
+        cum_int = np.zeros_like(delta_c)  # ✅ FIX
 
         for i in range(1, len(delta_c)):
-            cum_int[i] = (
-                cum_int[i-1]
-                + 0.5 * (delta_c[i] + delta_c[i-1]) * (t[i] - t[i-1])
+            cum_int[i] = cum_int[i - 1] + 0.5 * (delta_c[i] + delta_c[i - 1]) * (
+                t[i] - t[i - 1]
             )
 
         df["q"] = (column.flrt * cum_int) / column.wt
@@ -104,20 +104,13 @@ for compound in compounds:
         # -----------------------------
         print("\nFreundlich fit:")
         PSDM_tools.isotherm_fit(
-            fit_df[["Ce", "q"]],
-            isotherm="freundlich",
-            plot=True,
-            save_plot=False
+            fit_df[["Ce", "q"]], isotherm="freundlich", plot=True, save_plot=False
         )
 
         print("\nLangmuir fit:")
         PSDM_tools.isotherm_fit(
-            fit_df[["Ce", "q"]],
-            isotherm="langmuir",
-            plot=True,
-            save_plot=False
+            fit_df[["Ce", "q"]], isotherm="langmuir", plot=True, save_plot=False
         )
-
 
     except Exception as e:
         print(f"{compound} failed:", e)
