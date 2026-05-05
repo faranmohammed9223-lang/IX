@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 from scipy.optimize import minimize
 from ixpy.hsdmix import HSDMIX
 from ixpy.colloc import build_collocation  # optional
+from pathlib import Path
 
 data_in = "Actual_exp_Data_Provided_1.xlsx"
 sheets = pd.read_excel(data_in, sheet_name=None)
@@ -193,6 +194,9 @@ def fit_kxc_ds_robust(pfas):
 
 
 def plot_fit(result):
+    plot_dir = Path("plots")
+    plot_dir.mkdir(exist_ok=True)
+    
     plt.figure(figsize=(10, 5))
     plt.plot(result["BVx_exp"], result["y_exp"], "o", alpha=0.5, label="Experimental")
     plt.plot(
@@ -211,7 +215,11 @@ def plot_fit(result):
     plt.legend()
     plt.grid(True)
     plt.tight_layout()
+
+    filename = plot_dir / f"{result['PFAS']}_fit.png"
+    plt.savefig(filename, dpi=300, bbox_inches="tight")
     plt.show()
+    plt.close()
 
 
 # =========================================================
