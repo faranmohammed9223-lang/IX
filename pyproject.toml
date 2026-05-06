@@ -15,6 +15,9 @@ dependencies = [
   "matplotlib",
   "openpyxl",
   "xlsxwriter",
+  "lmfit",
+  "scikit-learn",
+  "plotly",
   "ixpy @ file:./Water_Treatment_Models/IonExchangeModel",
   "PSDM-models @ file:./Water_Treatment_Models/PSDM"
 ]
