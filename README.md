@@ -166,3 +166,57 @@ plot_fit(r)
 
 MIT
 
+## Local Install With Forked Water_Treatment_Models Submodule
+
+This repository can install dependencies directly from the checked-out
+`Water_Treatment_Models` submodule, including both PSDM and IonExchangeModel.
+
+These submodules are required dependencies for the IX package.
+
+### 1. Ensure submodules are initialized
+
+```bash
+git submodule update --init --recursive
+```
+
+### 2. Install all dependencies and local packages
+
+From the `IX` directory:
+
+```bash
+python -m pip install --upgrade pip
+python -m pip install -e .
+```
+
+This installs from `pyproject.toml`:
+
+* Base Python dependencies used by IX scripts
+* `IonExchangeModel` from `./Water_Treatment_Models/IonExchangeModel`
+* `PSDM` from `./Water_Treatment_Models/PSDM`
+* The local IX bundle metadata package
+
+### 3. Quick verification
+
+```bash
+python -c "import PSDM.PSDM as p; import ixpy; print('imports ok')"
+```
+
+## Install Smoke Tests
+
+The repository includes a lightweight install smoke test in [tests/test_install_smoke.py](tests/test_install_smoke.py).
+
+Run it locally after installation with:
+
+```bash
+python -m unittest discover -s tests -p "test_*.py"
+```
+
+### GitHub Actions coverage
+
+Two workflows are provided:
+
+* [install-smoke.yml](.github/workflows/install-smoke.yml) runs on GitHub-hosted Linux and macOS runners
+* [install-smoke-wsl.yml](.github/workflows/install-smoke-wsl.yml) is an optional manual workflow for a self-hosted WSL runner
+
+WSL is handled separately because GitHub-hosted runners do not provide a native WSL environment. To test WSL in GitHub Actions, register a self-hosted runner from inside your WSL environment and label it `wsl`.
+
