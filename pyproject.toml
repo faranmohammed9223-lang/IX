@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pfas-ix-bundle"
+version = "0.1.0"
+description = "PFAS IX modeling bundle with local Water_Treatment_Models submodule dependencies"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+  "numpy",
+  "pandas",
+  "scipy",
+  "matplotlib",
+  "openpyxl",
+  "xlsxwriter",
+  "lmfit",
+  "scikit-learn",
+  "plotly",
+  "ixpy @ file:./Water_Treatment_Models/IonExchangeModel",
+  "PSDM-models @ file:./Water_Treatment_Models/PSDM"
+]
+
+[tool.setuptools]
+py-modules = []
