@@ -9,8 +9,15 @@ Created on Wed Jun  3 06:46:48 2020
 
 
 from setuptools import setup
+from pathlib import Path
 
-with open("README.md", "rb") as f:
+
+root = Path(__file__).resolve().parent
+readme_path = root / "README.md"
+if not readme_path.exists():
+    readme_path = root / "Readme.md"
+
+with readme_path.open("rb") as f:
     long_descr = f.read().decode("utf-8")
 
 
