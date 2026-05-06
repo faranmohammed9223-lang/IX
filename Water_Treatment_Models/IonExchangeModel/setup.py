@@ -11,7 +11,6 @@ Created on Wed Jun  3 06:46:48 2020
 from setuptools import setup
 from pathlib import Path
 
-
 root = Path(__file__).resolve().parent
 readme_path = root / "README.md"
 if not readme_path.exists():
