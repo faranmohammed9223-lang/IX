@@ -1,0 +1,17 @@
+length = 1.5 #cm
+diameter = 0.318 #cm
+flow_rate = 7.14 #mL/min
+bed_mass = 0.043 #g
+porosity = 0.381
+particle_diameter = 0.0068 #cm
+shape_factor = 1.5
+apparent_density = 0.583 #g/mL
+run_time = 0.03 #days
+first_time_point = 5e-4 #days
+time_step = 5e-4 #days
+axial_collocations = 8
+radial_collocations = 3
+K = 25
+surface_pore_diffusion_flux_ratio = 15
+
+#PFAS properties same as excel file
